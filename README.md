@@ -30,7 +30,6 @@ A powerful web application that uses advanced pattern analysis to detect whether
 
 ### 🎨 **Modern UI/UX**
 
-- **Dark/Light Theme Support**: Seamless theme switching
 - **Responsive Design**: Works perfectly on desktop and mobile devices
 - **Real-time Progress**: Live updates during repository analysis
 - **Interactive Dialogs**: Detailed code viewing with syntax highlighting
@@ -47,7 +46,7 @@ A powerful web application that uses advanced pattern analysis to detect whether
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/ai-code-detective.git
+   git clone https://github.com/Siddu-06-0405/ai-code-detective.git
    cd ai-code-detective
    ```
 
@@ -68,7 +67,7 @@ A powerful web application that uses advanced pattern analysis to detect whether
    ```
 
 4. **Open your browser**
-   Navigate to `http://localhost:5173` to start using the application.
+   Navigate to `http://localhost:8080` to start using the application.
 
 ## 🔧 Usage
 
@@ -172,14 +171,14 @@ The analyzer automatically skips:
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/your-username/ai-code-detective/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/Siddu-06-0405/ai-code-detective/issues).
 
 ### How to Contribute
 
 1. **Fork the Project**
 
    ```bash
-   git clone https://github.com/your-username/ai-code-detective.git
+   git clone https://github.com/Siddu-06-0405/ai-code-detective.git
    ```
 
 2. **Create your Feature Branch**
