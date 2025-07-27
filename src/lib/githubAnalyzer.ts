@@ -71,12 +71,26 @@ function getLanguageFromPath(filePath: string): string {
 }
 
 function shouldAnalyzeFile(filePath: string): boolean {
+  // Skip files in node_modules
+  if (filePath.includes('node_modules/')) return false;
+  
   const ext = filePath.toLowerCase().match(/\.[^.]*$/)?.[0];
   if (!ext) return false;
   
-  // Only analyze code files
-  const codeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.cpp', '.cc', '.cxx', '.c++', '.cs', '.go', '.rs', '.php', '.rb', '.swift', '.kt', '.scala', '.vue', '.svelte'];
-  if (!codeExtensions.includes(ext)) return false;
+  // Analyze all text-based files including markdown, code, config files, etc.
+  const textExtensions = [
+    '.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.cpp', '.cc', '.cxx', '.c++', 
+    '.cs', '.go', '.rs', '.php', '.rb', '.swift', '.kt', '.scala', '.vue', '.svelte',
+    '.html', '.css', '.scss', '.sass', '.md', '.mdx', '.txt', '.json', '.yaml', '.yml',
+    '.xml', '.sh', '.bash', '.zsh', '.fish', '.ps1', '.bat', '.cmd', '.sql', '.r',
+    '.dart', '.lua', '.perl', '.pl', '.clj', '.cljs', '.elm', '.ex', '.exs', '.fs',
+    '.fsx', '.fsi', '.ml', '.mli', '.hs', '.lhs', '.jl', '.nim', '.cr', '.d', '.pas',
+    '.pp', '.dpr', '.dfm', '.inc', '.asm', '.s', '.S', '.dockerfile', '.cmake',
+    '.mk', '.makefile', '.gradle', '.sbt', '.pom', '.csproj', '.fsproj', '.vbproj',
+    '.vcxproj', '.pbxproj', '.xcconfig', '.plist', '.ini', '.cfg', '.conf', '.config',
+    '.toml', '.lock', '.env', '.gitignore', '.gitattributes', '.editorconfig'
+  ];
+  if (!textExtensions.includes(ext)) return false;
   
   // Skip framework-provided and generated files
   const excludePatterns = [
@@ -130,9 +144,6 @@ function shouldAnalyzeFile(filePath: string): boolean {
     /__tests__\//,
     /\.test\//,
     
-    // Documentation
-    /\.md$/,
-    /\.mdx$/,
     
     // Hidden and config folders
     /\/\./,
@@ -383,11 +394,37 @@ export async function analyzeGitHubRepository(
     overallConfidence: analyzedCount > 0 ? totalConfidence / analyzedCount : 0
   };
   
+  // Sort files to prioritize those with emoji/invisible character detections
+  const sortedFiles = fileAnalyses.sort((a, b) => {
+    // Priority 1: Files with invisible characters (highest priority)
+    const aHasInvisible = a.analysis.lineAnalysis.some(line => 
+      line.isAI && line.reasons.some(r => r.includes('invisible Unicode'))
+    );
+    const bHasInvisible = b.analysis.lineAnalysis.some(line => 
+      line.isAI && line.reasons.some(r => r.includes('invisible Unicode'))
+    );
+    if (aHasInvisible && !bHasInvisible) return -1;
+    if (!aHasInvisible && bHasInvisible) return 1;
+    
+    // Priority 2: Files with emojis (second priority)
+    const aHasEmoji = a.analysis.lineAnalysis.some(line => 
+      line.isAI && line.reasons.some(r => r.includes('emojis'))
+    );
+    const bHasEmoji = b.analysis.lineAnalysis.some(line => 
+      line.isAI && line.reasons.some(r => r.includes('emojis'))
+    );
+    if (aHasEmoji && !bHasEmoji) return -1;
+    if (!aHasEmoji && bHasEmoji) return 1;
+    
+    // Priority 3: Files with higher AI percentage
+    return b.analysis.aiPercentage - a.analysis.aiPercentage;
+  });
+
   return {
     repositoryUrl,
     totalFiles: allFiles.length,
     analyzedFiles: fileAnalyses.length,
-    files: fileAnalyses,
+    files: sortedFiles,
     overallStats,
     hasLovableLabel
   };
