@@ -174,7 +174,25 @@ export function CodeAnalyzer() {
 
             <TabsContent value="ai" className="mt-4">
               <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                {file.analysis.lineAnalysis.filter(line => line.isAI).map((lineAnalysis, index) => {
+                {file.analysis.lineAnalysis
+                  .filter(line => line.isAI)
+                  .sort((a, b) => {
+                    // Priority 1: Invisible characters (highest weight)
+                    const aHasInvisible = a.reasons.some(r => r.includes('invisible Unicode'));
+                    const bHasInvisible = b.reasons.some(r => r.includes('invisible Unicode'));
+                    if (aHasInvisible && !bHasInvisible) return -1;
+                    if (!aHasInvisible && bHasInvisible) return 1;
+                    
+                    // Priority 2: Emojis (second highest weight)
+                    const aHasEmoji = a.reasons.some(r => r.includes('emojis'));
+                    const bHasEmoji = b.reasons.some(r => r.includes('emojis'));
+                    if (aHasEmoji && !bHasEmoji) return -1;
+                    if (!aHasEmoji && bHasEmoji) return 1;
+                    
+                    // Priority 3: Sort by confidence (highest first)
+                    return b.confidence - a.confidence;
+                  })
+                  .map((lineAnalysis, index) => {
                   const originalIndex = file.analysis.lineAnalysis.findIndex(line => line === lineAnalysis);
                   return (
                     <div
@@ -661,7 +679,25 @@ export function CodeAnalyzer() {
 
                 <TabsContent value="ai" className="mt-4">
                   <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                    {analysis.lineAnalysis.filter(line => line.isAI).map((lineAnalysis, index) => {
+                    {analysis.lineAnalysis
+                      .filter(line => line.isAI)
+                      .sort((a, b) => {
+                        // Priority 1: Invisible characters (highest weight)
+                        const aHasInvisible = a.reasons.some(r => r.includes('invisible Unicode'));
+                        const bHasInvisible = b.reasons.some(r => r.includes('invisible Unicode'));
+                        if (aHasInvisible && !bHasInvisible) return -1;
+                        if (!aHasInvisible && bHasInvisible) return 1;
+                        
+                        // Priority 2: Emojis (second highest weight)
+                        const aHasEmoji = a.reasons.some(r => r.includes('emojis'));
+                        const bHasEmoji = b.reasons.some(r => r.includes('emojis'));
+                        if (aHasEmoji && !bHasEmoji) return -1;
+                        if (!aHasEmoji && bHasEmoji) return 1;
+                        
+                        // Priority 3: Sort by confidence (highest first)
+                        return b.confidence - a.confidence;
+                      })
+                      .map((lineAnalysis, index) => {
                       const originalIndex = analysis.lineAnalysis.findIndex(line => line === lineAnalysis);
                       return (
                         <div

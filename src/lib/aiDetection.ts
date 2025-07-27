@@ -24,6 +24,22 @@ interface DetectionPattern {
 
 // AI detection patterns based on real AI vs human coding characteristics
 const AI_PATTERNS: DetectionPattern[] = [
+  // CRITICAL: Invisible/untypable Unicode characters (impossible to type by humans)
+  {
+    pattern: /[\u200B\u200C\u200D\uFEFF\u2060\u180E\u2061\u2062\u2063\u2064]/,
+    weight: 1.0,
+    reason: "Contains invisible Unicode characters (untypable by humans) - definitive AI signature",
+    aiIndicator: true
+  },
+  
+  // HIGH CONFIDENCE: Emoji usage in code (AI commonly adds emojis)
+  {
+    pattern: /[\u{1F300}-\u{1F9FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u,
+    weight: 0.9,
+    reason: "Contains emojis in code - strong AI indicator",
+    aiIndicator: true
+  },
+  
   // ChatGPT signature: Sectioned comments with dashes
   {
     pattern: /\/\/\s*---\s*.*\s*---\s*$/gm,
