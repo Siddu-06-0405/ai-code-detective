@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Brain, User, Zap, AlertTriangle, CheckCircle, Github, FileCode, Eye, Heart } from "lucide-react";
+import { Brain, User, Zap, AlertTriangle, CheckCircle, Github, FileCode, Eye, Heart, Calendar, Clock, GitCommit, TrendingUp, Users, Activity, BarChart3 } from "lucide-react";
 import { analyzeCode } from "@/lib/aiDetection";
 import { analyzeGitHubRepository } from "@/lib/githubAnalyzer";
 import type { AnalysisResult } from "@/lib/aiDetection";
@@ -394,6 +394,11 @@ export function CodeAnalyzer() {
               <CardTitle className="flex items-center gap-2">
                 <Github className="w-5 h-5 text-primary" />
                 Repository Analysis
+                {repoAnalysis.isForked && (
+                  <Badge variant="outline" className="border-orange-500 text-orange-600 bg-orange-50">
+                    Fork Detected
+                  </Badge>
+                )}
                 {repoAnalysis.hasLovableLabel && (
                   <Badge className="bg-gradient-to-r from-pink-500 to-purple-600 text-white">
                     <Heart className="w-3 h-3 mr-1" />
@@ -401,8 +406,13 @@ export function CodeAnalyzer() {
                   </Badge>
                 )}
               </CardTitle>
-              <CardDescription>
-                {repoAnalysis.repositoryUrl}
+              <CardDescription className="space-y-1">
+                <div>{repoAnalysis.repositoryUrl}</div>
+                {repoAnalysis.isForked && repoAnalysis.originalRepositoryUrl && (
+                  <div className="text-sm text-orange-600">
+                    ⚠️ Analyzed original repository (not fork) for accurate timeline data
+                  </div>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -443,6 +453,9 @@ export function CodeAnalyzer() {
                     <span className="font-medium">Analyzed Files:</span> {repoAnalysis.analyzedFiles}
                   </div>
                   <div className="text-sm">
+                    <span className="font-medium">Branches Scanned:</span> {repoAnalysis.totalBranches}
+                  </div>
+                  <div className="text-sm">
                     <span className="font-medium">Total Lines:</span> {repoAnalysis.overallStats.totalLines}
                   </div>
                   <div className="text-sm">
@@ -468,6 +481,449 @@ export function CodeAnalyzer() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Commit History Analysis */}
+          {repoAnalysis.commitAnalysis && (
+            <div className="space-y-6">
+              {/* Commit Overview */}
+              <Card className="border-code-border bg-gradient-to-br from-card to-code-bg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <GitCommit className="w-5 h-5 text-primary" />
+                    Commit History & Development Timeline
+                  </CardTitle>
+                  <CardDescription>
+                    AI detection in commit messages and work time estimation
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Clock className="w-5 h-5 text-primary" />
+                          <span className="font-semibold">Time Investment</span>
+                        </div>
+                        <div className="text-2xl font-bold text-primary">
+                          {repoAnalysis.commitAnalysis.totalEstimatedHours.toFixed(1)}h
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Estimated development time
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-ai/10 to-ai/5 border border-ai/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Brain className="w-5 h-5 text-ai" />
+                          <span className="font-semibold">AI Commits</span>
+                        </div>
+                        <div className="text-2xl font-bold text-ai">
+                          {Math.round(repoAnalysis.commitAnalysis.aiCommitPercentage)}%
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          AI-generated commit messages
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <GitCommit className="w-5 h-5 text-green-600" />
+                          <span className="font-semibold">Total Commits</span>
+                        </div>
+                        <div className="text-2xl font-bold text-green-600">
+                          {repoAnalysis.commitAnalysis.totalCommits}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Repository commits
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Users className="w-5 h-5 text-blue-600" />
+                          <span className="font-semibold">Contributors</span>
+                        </div>
+                        <div className="text-2xl font-bold text-blue-600">
+                          {repoAnalysis.commitAnalysis.contributors.length}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Active developers
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Calendar className="w-5 h-5 text-purple-600" />
+                          <span className="font-semibold">Project Duration</span>
+                        </div>
+                        <div className="text-lg font-bold text-purple-600">
+                          {Math.ceil((new Date(repoAnalysis.commitAnalysis.projectEndDate).getTime() - 
+                                    new Date(repoAnalysis.commitAnalysis.projectStartDate).getTime()) / 
+                                   (1000 * 60 * 60 * 24))} days
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          From first to last commit
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <TrendingUp className="w-5 h-5 text-orange-600" />
+                          <span className="font-semibold">Avg/Day</span>
+                        </div>
+                        <div className="text-lg font-bold text-orange-600">
+                          {(repoAnalysis.commitAnalysis.totalEstimatedHours / 
+                            Math.max(1, Math.ceil((new Date(repoAnalysis.commitAnalysis.projectEndDate).getTime() - 
+                                                 new Date(repoAnalysis.commitAnalysis.projectStartDate).getTime()) / 
+                                                (1000 * 60 * 60 * 24)))).toFixed(1)}h
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Hours per day average
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Contributors Analysis */}
+              <Card className="border-code-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-primary" />
+                    Contributors Analysis
+                  </CardTitle>
+                  <CardDescription>
+                    Development time and AI usage by contributor
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                    {repoAnalysis.commitAnalysis.contributors.map((contributor, index) => (
+                      <div key={index} className="p-4 rounded-lg border bg-card/50">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <div className="font-semibold">{contributor.name}</div>
+                            <div className="text-sm text-muted-foreground">{contributor.email}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-primary">{contributor.estimatedHours.toFixed(1)}h</div>
+                            <div className="text-sm text-muted-foreground">{contributor.totalCommits} commits</div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 mb-3">
+                          <div>
+                            <div className="text-sm text-muted-foreground">Code Changes</div>
+                            <div className="text-sm">
+                              <span className="text-green-600">+{contributor.totalAdditions}</span>{" "}
+                              <span className="text-red-600">-{contributor.totalDeletions}</span>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-muted-foreground">Active Days</div>
+                            <div className="text-sm font-medium">{contributor.commitDays.length}</div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span>AI Commit Messages</span>
+                            <span className="font-medium text-ai">
+                              {Math.round(contributor.aiCommitPercentage)}%
+                            </span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-ai transition-all" 
+                              style={{ width: `${contributor.aiCommitPercentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Development Timeline */}
+              <Card className="border-code-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-primary" />
+                    Development Timeline
+                  </CardTitle>
+                  <CardDescription>
+                    Daily activity and AI usage patterns
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                    {repoAnalysis.commitAnalysis.timeline
+                      .slice(-30) // Show last 30 days
+                      .map((day, index) => (
+                      <div key={index} className="flex items-center gap-4 p-3 rounded-lg bg-card/30 border">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="font-medium text-sm">
+                              {new Date(day.date).toLocaleDateString()}
+                            </div>
+                            <div className="flex items-center gap-3 text-sm">
+                              <span className="text-muted-foreground">
+                                {day.commits} commits
+                              </span>
+                              <span className="text-primary font-medium">
+                                {day.estimatedHours.toFixed(1)}h
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="text-xs text-green-600">+{day.additions}</div>
+                            <div className="text-xs text-red-600">-{day.deletions}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {day.contributors.join(', ')}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-ai transition-all" 
+                                style={{ width: `${day.commits > 0 ? (day.aiCommits / day.commits) * 100 : 0}%` }}
+                              />
+                            </div>
+                            <div className="text-xs text-ai font-medium">
+                              {day.commits > 0 ? Math.round((day.aiCommits / day.commits) * 100) : 0}% AI
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Commit Messages Analysis */}
+              <Card className="border-code-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-primary" />
+                    Commit Messages Analysis
+                  </CardTitle>
+                  <CardDescription>
+                    AI detection results for commit messages
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="all" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="all" className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4" />
+                        All Commits ({repoAnalysis.commitAnalysis.totalCommits})
+                      </TabsTrigger>
+                      <TabsTrigger value="ai" className="flex items-center gap-2">
+                        <Brain className="w-4 h-4" />
+                        AI Only ({repoAnalysis.commitAnalysis.commits.filter(c => c.isAI).length})
+                      </TabsTrigger>
+                      <TabsTrigger value="human" className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Human Only ({repoAnalysis.commitAnalysis.commits.filter(c => !c.isAI).length})
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="all" className="mt-4">
+                      <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                        {repoAnalysis.commitAnalysis.commits.slice(0, 50).map((commit, index) => (
+                          <div
+                            key={index}
+                            className={`p-4 rounded-lg border transition-all hover:bg-muted/50 ${
+                              commit.isAI ? 'border-ai/30 bg-ai/5' : 'border-human/30 bg-human/5'
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex items-center gap-2 min-w-0">
+                                {commit.isAI ? (
+                                  <Brain className="w-4 h-4 text-ai" />
+                                ) : (
+                                  <User className="w-4 h-4 text-human" />
+                                )}
+                                {getConfidenceBadge(commit.confidence, commit.isAI)}
+                              </div>
+                              
+                              <div className="flex-1 min-w-0">
+                                <div className="font-mono text-sm mb-2 break-words">
+                                  {commit.message}
+                                </div>
+                                
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
+                                  <span>{commit.author.name}</span>
+                                  <span>{new Date(commit.author.date).toLocaleDateString()}</span>
+                                  <span className="text-green-600">+{commit.stats.additions}</span>
+                                  <span className="text-red-600">-{commit.stats.deletions}</span>
+                                  <a 
+                                    href={commit.url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline"
+                                  >
+                                    {commit.sha.substring(0, 7)}
+                                  </a>
+                                </div>
+                                
+                                {commit.reasons.length > 0 && (
+                                  <div className="space-y-1">
+                                    {commit.reasons.map((reason, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded"
+                                      >
+                                        {reason}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="ai" className="mt-4">
+                      <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                        {repoAnalysis.commitAnalysis.commits
+                          .filter(commit => commit.isAI)
+                          .sort((a, b) => {
+                            // Priority 1: Invisible characters (highest weight)
+                            const aHasInvisible = a.reasons.some(r => r.includes('invisible Unicode'));
+                            const bHasInvisible = b.reasons.some(r => r.includes('invisible Unicode'));
+                            if (aHasInvisible && !bHasInvisible) return -1;
+                            if (!aHasInvisible && bHasInvisible) return 1;
+                            
+                            // Priority 2: Emojis (second highest weight)
+                            const aHasEmoji = a.reasons.some(r => r.includes('emojis'));
+                            const bHasEmoji = b.reasons.some(r => r.includes('emojis'));
+                            if (aHasEmoji && !bHasEmoji) return -1;
+                            if (!aHasEmoji && bHasEmoji) return 1;
+                            
+                            // Priority 3: Sort by confidence (highest first)
+                            return b.confidence - a.confidence;
+                          })
+                          .slice(0, 50)
+                          .map((commit, index) => (
+                          <div
+                            key={index}
+                            className="p-4 rounded-lg border transition-all hover:bg-muted/50 border-ai/30 bg-ai/5"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Brain className="w-4 h-4 text-ai" />
+                                {getConfidenceBadge(commit.confidence, commit.isAI)}
+                              </div>
+                              
+                              <div className="flex-1 min-w-0">
+                                <div className="font-mono text-sm mb-2 break-words">
+                                  {commit.message}
+                                </div>
+                                
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
+                                  <span>{commit.author.name}</span>
+                                  <span>{new Date(commit.author.date).toLocaleDateString()}</span>
+                                  <span className="text-green-600">+{commit.stats.additions}</span>
+                                  <span className="text-red-600">-{commit.stats.deletions}</span>
+                                  <a 
+                                    href={commit.url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline"
+                                  >
+                                    {commit.sha.substring(0, 7)}
+                                  </a>
+                                </div>
+                                
+                                {commit.reasons.length > 0 && (
+                                  <div className="space-y-1">
+                                    {commit.reasons.map((reason, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded"
+                                      >
+                                        {reason}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="human" className="mt-4">
+                      <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                        {repoAnalysis.commitAnalysis.commits
+                          .filter(commit => !commit.isAI)
+                          .slice(0, 50)
+                          .map((commit, index) => (
+                          <div
+                            key={index}
+                            className="p-4 rounded-lg border transition-all hover:bg-muted/50 border-human/30 bg-human/5"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <User className="w-4 h-4 text-human" />
+                                {getConfidenceBadge(commit.confidence, commit.isAI)}
+                              </div>
+                              
+                              <div className="flex-1 min-w-0">
+                                <div className="font-mono text-sm mb-2 break-words">
+                                  {commit.message}
+                                </div>
+                                
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
+                                  <span>{commit.author.name}</span>
+                                  <span>{new Date(commit.author.date).toLocaleDateString()}</span>
+                                  <span className="text-green-600">+{commit.stats.additions}</span>
+                                  <span className="text-red-600">-{commit.stats.deletions}</span>
+                                  <a 
+                                    href={commit.url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline"
+                                  >
+                                    {commit.sha.substring(0, 7)}
+                                  </a>
+                                </div>
+                                
+                                {commit.reasons.length > 0 && (
+                                  <div className="space-y-1">
+                                    {commit.reasons.map((reason, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded"
+                                      >
+                                        {reason}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* File-by-file Analysis */}
           <Card className="border-code-border">
